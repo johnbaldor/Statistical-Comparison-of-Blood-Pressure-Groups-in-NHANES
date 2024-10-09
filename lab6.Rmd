@@ -1,0 +1,114 @@
+---
+title: "Exercises"
+output:
+  word_document: default
+  pdf_document: default
+---
+
+
+## Exercise 1:
+
+```{r setup, message=FALSE,warning=FALSE}
+library(mosaic)
+library(tidyverse)
+```
+
+Read in "NHANES" dataset and take the adult (age $18+$ subset:
+(change the code below so that it points to where you have nhanes.csv saved)
+```{r}
+nhanes <- read_csv('nhanes.csv')
+### only adults
+nhanes <- filter(nhanes,age>=18)
+```
+
+Consider weights for people with "PreHypertension," or systolic blood pressure between 120 and 140.
+```{r}
+PreHyp <- filter(nhanes,sbpClass=='Prehypertension')
+```
+
+ * Use the formula (as above) to calculate the 90% C.I. for the mean weight for all PreHypertensive people in the population represented by the NHANES survey. 
+```{r}
+NormalSBP <- filter(nhanes, sbpClass == 'Normal')
+# put your answer here
+weight <- NormalSBP$weight
+sampleMean <- mean(weight)
+sampleSD <- sd(weight)
+sampleSize <- length(weight)
+SE <- sampleSD/sqrt(sampleSize)
+alpha <- 1- 0.90 ## proportion of time CI is wrong
+critValue <- -qt(alpha/2,df=sampleSize-1)
+CI.lower <- sampleMean - critValue*SE #Lower bound of the C.I.
+CI.lower
+```
+
+ * Use function t.test to calculate the 90% C.I. for the mean weight for all PreHypertensive people in the population represented by the NHANES survey. 
+```{r}
+t.test(weight,conf.level = 0.9)
+# put your answer here
+```
+* What is the probability that the true population mean is inside the confidence interval you estimated? Does this question even make sense? Why or why not?
+
+The probability is 90%. Yes it makes sense becuase that is the confidence inerval we are taking, it is likely that the mean will be inside.
+
+* If you were to gather a large number of surveys from the same population, using the same methodology of NHANES, and estimate a confidence interval using each survey in the same way, what proportion of those confidence intervals should include the true population mean? 
+
+9/10 should include the true population mean 
+
+
+# Exercise 2: 
+
+Now study the difference of the mean weight between adults with prehypertension and adults with SPB Stage 1 Hypertension. 
+
+We already have a dataset of prehypertensive people. Here's a dataset of people with Stage 1 Hypertension:
+```{r}
+stage1 <- filter(nhanes,sbpClass=='Stage 1 Hypertension')
+```
+
+Use the formula to calculate the 90% C.I. for the mean weight difference:
+
+* What is the standard error of the difference?
+```{r}
+w1 <- PreHyp$weight
+w2 <- stage1$weight
+w1 <- NormalSBP$weight; #Group1: weights for normal SBP;
+PreHyp <- filter(nhanes,sbpClass=='Prehypertension')
+w2 <- PreHyp$weight; #Group2: weights for prehypertension;
+
+### Calculation by formula: calculate the 95% confidence interval 
+#   for the difference of population means
+y1 <- mean(w1); #sample mean of group1. 
+y2 <- mean(w2); #sample mean of group2.
+
+s1 <- sd(w1); #sample SD
+s2 <- sd(w2); 
+
+n1 <- length(w1); #sample size
+n2 <- length(w2); #sample size
+
+V1 <- s1^2/n1; #sampling variance of sample mean of group 1.
+V2 <- s2^2/n2; #sampling variance of sample mean of group 2.
+
+Vdiff <- V1+V2 # sampling variance of difference of two sample means
+
+SE <- sqrt(Vdiff); #Standard error for the difference of sample means.
+SE
+
+
+```
+
+* What is a 90% CI of the difference?
+```{r}
+## put your answer here
+alpha <- 1- 0.90 ## proportion of time CI is wrong
+critValue <- -qt(alpha/2,df=sampleSize-1)
+CI.lower <- sampleMean - critValue*SE #Lower bound of the C.I.
+CI.lower
+```
+
+ * Use function t.test to calculate the 90% C.I. for the mean weight difference.
+```{r}
+## put your answer here
+t.test(w1, w2,conf.level = 0.90); 
+```
+
+
